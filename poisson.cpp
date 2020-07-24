@@ -81,7 +81,6 @@ void Voltage::calculate_voltage(){
     
 }
 
-
 Voltage::~Voltage(){}
 
 
@@ -100,6 +99,7 @@ void Electricfield::Electricfield_initialization(){
     Ey = new float*[nx-1];
     Ex_prime = new float*[nx-2];
     Ey_prime = new float*[nx-2];
+    E = new float*[nx-2];
     
 
     for(int i = 0;i<nx-1;i++)
@@ -111,6 +111,7 @@ void Electricfield::Electricfield_initialization(){
     {
         Ex_prime[i] = new float[ny-2];
         Ey_prime[i] = new float[ny-2];
+        E[i] = new float[ny-2];
     
     }    
 }
@@ -118,15 +119,9 @@ void Electricfield::Electricfield_initialization(){
 void Electricfield::calculate_electricfield(){
     calculate_voltage();
     Electricfield_initialization();
-    vector<float> E((nx-2) * (ny-2));
-    vector<float> Vnew(nx * ny);
+    
 
-    for(int i = 0;i<nx;i++)
-    {
-        for(int j = 0;j<ny;j++){
-            Vnew.at(ny * i + j) = V[i][j];
-        }
-    }
+    
     for(int i = 0;i<nx-1;i++)
     {
         for(int j = 0;j<ny-1;j++)
@@ -141,26 +136,63 @@ void Electricfield::calculate_electricfield(){
     {
         for(int j = 0;j<ny-2;j++)
         {
-            Ex_prime[i][j] = (0.5)*(Ex[i][j] + Ex[i][j+1]);
+            Ex_prime[i][j] = (0.5)*(Ex[i][j] + Ex[i][j+1]); 
             Ey_prime[i][j] = (0.5)*(Ey[i][j] + Ey[i+1][j]);
-            E.at((ny-2) * i + j) = sqrt(pow(Ex_prime[i][j],2) + pow(Ey_prime[i][j],2));
+            E[i][j] = sqrt(pow(Ex_prime[i][j],2) + pow(Ey_prime[i][j],2));
 
+        }
+    }
+}
+void Electricfield::plotcsv(){
+    ofstream file;
+    file.open("E.csv");
+    for(int i = 0;i<nx-2;i++){
+        for(int j = 0;j<ny-2;j++){
+            file << E[i][j] <<",";
+        }
+        file <<endl;
+    }
+    file.close();
+
+
+    // for voltage plot change nx-2 to nx and ny - 2 to ny and E[i][j] to V[i][j] and file name 
+}
+void Electricfield::Eplot(){
+    vector<float> Enew((nx-2) * (ny-2));
+    
+    for(int i = 0;i<nx-2;i++)
+    {
+        for(int j = 0;j<ny-2;j++){
+            Enew.at((ny - 2) * i + j) = E[i][j];
+        }
+    }
+    
+    
+    const float* z = &(Enew[0]);
+    PyObject* m;
+    plt::title("Electricfield Intenity");
+    plt::imshow(z,nx-2,ny-2,1,{}, &m);
+    plt::colorbar(m);
+    plt::save("Electricfield.png");
+    Py_DECREF(m);
+
+    //voltage plot
+
+    /*vector<float> Vnew(nx * ny);
+    for(int i = 0;i<nx;i++)
+    {
+        for(int j = 0;j<ny;j++){
+            Vnew.at(ny * i + j) = V[i][j];
         }
     }
     const float* ztr = &(Vnew[0]);
     PyObject* mat;
-    /*plt::title("Voltage Potential");
+    plt::title("Voltage Potential");
     plt::imshow(ztr,nx,ny,1,{},&mat);
     plt::colorbar(mat);
     plt::save("Voltage.png");*/
-    
-    const float* z = &(E[0]);
-    plt::title("Electricfield Intenity");
-    plt::imshow(z,nx-2,ny-2,1,{}, &mat);
-    plt::colorbar(mat);
-    plt::save("Electricfield.png");
-    Py_DECREF(mat);
-    //delete ztr;
+
+
     freeVoltage(V,nx,ny);
     freeVoltage(source,nx,ny);
     freeVoltage(R,nx,ny);

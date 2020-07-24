@@ -10,8 +10,6 @@ class Voltage{
     float **V;
     float **source;
     float **R;
-
-    public:
     Voltage(int nx1, int ny1, float step_size,float Vup, float Vdown);
     void voltage_initialization();
     float norm();
@@ -33,8 +31,10 @@ class Electricfield : public Voltage{
     Electricfield(int nx1,int ny1,float step_size,float Vup, float Vdown);
     void Electricfield_initialization();
     void calculate_electricfield();
-    void freeElectricfield(float **variable,float nx,float ny);
+    void plotcsv();
+    void Eplot();
 
+    void freeElectricfield(float **variable,float nx,float ny);
     ~Electricfield();  
 
 };

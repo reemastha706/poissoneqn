@@ -36,6 +36,8 @@ int main(){
     cout <<"Loading....."<<endl;
     Electricfield e(nx1,ny1,step_size,Vup,Vdown);
     e.calculate_electricfield();
+    e.Eplot();  //comment the above line if you don't want to use this matplotlibcpp.h
+  // e.plotcsv();    //if you want csv data 
     cout <<"Your output is ready."<<endl;
 
     
